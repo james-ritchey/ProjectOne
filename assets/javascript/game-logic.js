@@ -35,15 +35,7 @@ $(document).ready(function(){
         gameFull: false
     }
 
-    var config = {
-        apiKey: "AIzaSyAvhHsfODB_Ig0MUCq6dn71JURli3SLJzI",
-        authDomain: "triviagame-e40d7.firebaseapp.com",
-        databaseURL: "https://triviagame-e40d7.firebaseio.com",
-        projectId: "triviagame-e40d7",
-        storageBucket: "triviagame-e40d7.appspot.com",
-        messagingSenderId: "34711059818"
-    };
-    firebase.initializeApp(config);
+    
 
     var database = firebase.database();
     //database.ref("game/").set(gameReset);
@@ -59,27 +51,9 @@ $(document).ready(function(){
         
         if(snapshot.val().gameCreated && !(snapshot.val().gameFull)){
             $("#new-player").css("display", "block"); 
-            var newList = $("<ul>");
-            for(var i = 1; i <= game.playerCount; i++){
-                database.ref("game/players/player" + i).once("value").then(function(snapshot){
-                    var newPlayer = $("<li>");
-                    $(newPlayer).text(snapshot.val());
-                    $(newList).append($(newPlayer));
-                });
-            }  
-            $("#player-list").append($(newList));
         }
         else if(snapshot.val().gameCreated && snapshot.val().gameFull){
             $("#spectator").css("display", "block");
-            var newList = $("<ul>");
-            for(var i = 1; i <= game.playerCount; i++){
-                database.ref("game/players/player" + i).once("value").then(function(snapshot){
-                    var newPlayer = $("<li>");
-                    $(newPlayer).text(snapshot.val());
-                    $(newList).append($(newPlayer));
-                });
-            }  
-            $("#player-list").append($(newList));
         }
         else if(!snapshot.val().gameCreated){
             $("#new-host").css("display", "block");
