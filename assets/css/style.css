@@ -1,0 +1,16 @@
+/* body * {
+    border: 1px solid red;
+} */
+
+body {
+    background-image: url("../images/pexels-photo-310452.jpeg");
+    background-size:     cover;                    
+    background-repeat:   no-repeat;
+    background-position: center top;
+    max-width: auto;
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
