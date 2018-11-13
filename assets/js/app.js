@@ -200,10 +200,10 @@ $(document).ready(function(){
      * to 'true'.
      */
     $("#create").on("click", function(){
-        game.players.player1 = $("#name").val().trim();
+        game.players.player1 = $("#host-name-input").val().trim();
         game.localPlayer = "player1";
-        $("#name").val("");
-        game.playerCount = $("#players").val().trim();
+        $("#host-name-input").val("");
+        //game.playerCount = $("#players").val().trim();
         $("#players").val(0);
         game.isHost = true;
         game.gameCreated = true;
@@ -301,9 +301,7 @@ $(document).ready(function(){
                         console.log("Tried to set allAnswered");
                     }
                 });
-            }
-
-            
+            }    
         }
     });
     /**
