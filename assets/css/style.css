@@ -3,7 +3,7 @@
 } */
 
 body {
-    background-image: url("../images/blur-blurry-bokeh-347139.jpg");
+    background-image: url("../images/images.jpeg");
     background-size:     cover;                    
     background-repeat:   no-repeat;
     background-position: center top;
@@ -17,4 +17,73 @@ body {
 
 #popUp1 {
     padding: 20px;
+}
+
+#question {
+    font-family: 'Pavanam', sans-serif;
+    line-height: 1.25em;
+}
+
+.quest-box {
+    background-color: #fbf8dd; 
+}
+
+.header {
+    color: white;
+    font-family: 'Megrim', cursive;
+    font-size: 110px;
+    font-weight: bold;
+    letter-spacing: 30px;
+    text-transform: lowercase;
+}
+
+.player-font {
+    font-family: 'Bowlby One SC', cursive;
+    color: rgb(4, 4, 117);
+}
+
+.num-correct {
+    font-family: 'Pavanam', sans-serif;
+}
+
+.quest-head {
+    font-family: 'Bowlby One SC', cursive;
+    color: rgb(4, 4, 117);
+}
+
+.card1 {
+background-color: #f7f0bb;
+}
+
+.card2 {
+    background-color: #f4e999;
+}
+
+.card3 {
+    background-color: #f0e277;
+}
+
+.card4 {
+    background-color: #ecdb54;
+}
+
+#correct-answer {
+    font-family: 'Pavanam', sans-serif;
+    font-style: italic;
+}
+
+.modal-header {
+    background-color: #005e70; 
+}
+
+.modal-footer {
+    background-color: #005e70;
+}
+
+.modal-header {
+    color:white;
+}
+
+.modal-inner {
+    background-color: white;
 }
