@@ -58,8 +58,8 @@ $(document).ready(function () {
             console.log(response.results[0].incorrect_answers);
             console.log(response.results[0].correct_answer);
 
-            $('.trivia').html('<p>' + response.results[0].question);
-            var ansLine = $('<ol>')
+            $('#question').html(response.results[0].question);
+            var ansLine = $('<ul>')
             var i = 0
             for (i = 0; i < 3; i++) {
                 var wchoice = $('<li class="c">').html(response.results[0].incorrect_answers[i]);
@@ -69,7 +69,7 @@ $(document).ready(function () {
             var rchoice = $('<li class="c">').html(response.results[0].correct_answer);
             rchoice.addClass('r');
             ansLine.append(rchoice)
-            $('.trivia').append(ansLine);
+            $('#answers').append(ansLine);
             $('.c').shuffle();
 
         })
