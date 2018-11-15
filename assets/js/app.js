@@ -19,9 +19,12 @@ $(document).ready(function(){
         playerNum: 0,
         allAnswered: false,
         reset: function() {
-            this.players = { player1: "", player2: "", player3: "", player4: ""};
-            this.answerChoices = { player1: "", player2: "", player3: "", player4: ""};
-            this.scores = { player1: 0, player2: 0, player3: 0, player4: 0};
+            this.players = {
+                player1: {name: "", answer: "", score: 0},
+                player2: {name: "", answer: "", score: 0},
+                player3: {name: "", answer: "", score: 0},
+                player4: {name: "", answer: "", score: 0},
+            },
             this.isHost = false;
             this.playerCount = 0;
             this.gameCreated = false;
@@ -42,7 +45,7 @@ $(document).ready(function(){
             player3: {name: "", answer: "", score: 0},
             player4: {name: "", answer: "", score: 0},
         },
-        playerCount: 0,
+        playerCount: 4,
         playerNum: 0,
         gameCreated: false,
         gameStarted: false,
@@ -72,6 +75,7 @@ $(document).ready(function(){
         game.gameStarted = snapshot.val().gameStarted;
         game.gameFull = snapshot.val().gameFull;
         game.playerNum = snapshot.val().playerNum;
+        localStorage.setItem("playerNum", snapshot.val().playerNum);
         
         if(snapshot.val().gameCreated && !(snapshot.val().gameFull)){
             $("#playerModal").modal("show"); 
@@ -83,7 +87,7 @@ $(document).ready(function(){
             $("#myModal").modal("show");
         }
 
-        if(game.playerNum <= 0) {
+        if(game.playerNum < 0) {
             game.playerNum = 0;
             database.ref("game/").update({playerNum: game.playerNum});
             localStorage.setItem("playerNum", 0);
@@ -145,28 +149,48 @@ $(document).ready(function(){
      */
     database.ref("game/players").on("value", function(snapshot){
         game.players = snapshot.val();
-        if(game.players.player1.name !== "")
+        var newPlayerNum = 0;
+        if(game.players.player1.name !== ""){
             $("#player1").text(game.players.player1.name);
-        else
+            newPlayerNum++;
+        }
+        else{
             $("#player1").text("Player 1");
-        if(game.players.player2.name !== "")
+        }
+        if(game.players.player2.name !== ""){
             $("#player2").text(game.players.player2.name);
-        else
+            newPlayerNum++;
+        }
+        else{
             $("#player2").text("Player 2");
-        if(game.players.player3.name !== "")
+        }
+        if(game.players.player3.name !== ""){
             $("#player3").text(game.players.player3.name);
-        else
+            newPlayerNum++;
+        }
+        else{
             $("#player3").text("Player 3");
-        if(game.players.player4.name !== "")
+        }
+        if(game.players.player4.name !== ""){
             $("#player4").text(game.players.player4.name);
-        else
+            newPlayerNum++;
+        }
+        else{
             $("#player4").text("Player 4");
+        }
+        if(newPlayerNum != game.playerNum) {
+            game.playerNum = newPlayerNum;
+        }
+        database.ref("game/playerNum").set(game.playerNum);
         console.log("We know the players changed to " + JSON.stringify(game.players));
     });
 
     database.ref("game/playerNum").on("value", function(snapshot){
         game.playerNum = snapshot.val();
         localStorage.setItem("playerNum", game.playerNum);
+        if(game.playerNum === 0 && game.gameCreated) {
+            database.ref("game/gameCreated").set(false);
+        }
     });
     /**
      * Is called when the gameStarted value changes on the database,
@@ -190,21 +214,22 @@ $(document).ready(function(){
     database.ref("game/playerCount").on("value", function(snapshot){
         game.playerCount = snapshot.val();
     });
-    
+    /*
     database.ref("game/").onDisconnect().update({disconnect: localStorage.getItem("localPlayer") + " has disconnected."}).then(function(){
         var disconnect = localStorage.getItem("localPlayer");
+        var newPlayerNum = localStorage.getItem("playerNum") - 1;
         if(disconnect !== ""){
             database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
-            database.ref("game/").update({playerNum: localStorage.getItem("playerNum") - 1});
-        }
-        database.ref("game/playerNum").once("value").then(function(snapshot){
-            if(snapshot.val() <= 0) {
-                database.ref("game/gameCreated").set(false);
+            if(newPlayerNum <= 0) {
+                database.ref("game/").update({playerNum: newPlayerNum, gameCreated: false});
             }
-        });
+            else {
+                database.ref("game/").update({playerNum: newPlayerNum});
+            }
+        }
         localStorage.setItem("localPlayer", "");
-        localStorage.setItem("playerNum", 0);
-    });
+        database.ref("unloadTest/").push("Yo we disconnected");
+    });*/
 
 
     /**
@@ -254,7 +279,6 @@ $(document).ready(function(){
                     playerList.player2.name = $("#player-name").val().trim();
                     game.localPlayer = "player2";
                     game.playerNum = 2;
-                    localStorage.setItem("playerNum", game.playerNum);
                     if(game.playerCount == 2)
                         game.gameFull = true;
                 }
@@ -262,7 +286,6 @@ $(document).ready(function(){
                     playerList.player3.name = $("#player-name").val().trim();
                     game.localPlayer = "player3";
                     game.playerNum = 3;
-                    localStorage.setItem("playerNum", game.playerNum);
                     if(game.playerCount == 3)
                         game.gameFull = true;
                 }
@@ -270,14 +293,14 @@ $(document).ready(function(){
                     playerList.player4.name = $("#player-name").val().trim();
                     game.localPlayer = "player4";
                     game.playerNum = 4;
-                    localStorage.setItem("playerNum", game.playerNum);
                     game.gameFull = true;
                 }
                 database.ref("game/players").update(playerList);
                 database.ref("game/gameFull").set(game.gameFull);
                 localStorage.setItem("localPlayer", game.localPlayer);
+                localStorage.setItem("playerNum", game.playerNum);
                 console.log(JSON.stringify(playerList));
-                console.log("We tried to join as " + $("#player-name").val().trim());
+                console.log("We tried to join as " + game.localPlayer);
                 $("#join-name").val("");
                 $("#playerModal").modal("toggle");
             });
@@ -324,6 +347,44 @@ $(document).ready(function(){
             }    
         }
     });
+
+    window.onbeforeunload = function(e){
+        var disconnect = localStorage.getItem("localPlayer");
+        var newPlayerNum = localStorage.getItem("playerNum") - 1;
+        if(disconnect !== "" && disconnect !== "player1"){
+            database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
+            if(newPlayerNum <= 0) {
+                database.ref("game/").update({playerNum: newPlayerNum, gameCreated: false});
+            }
+            else {
+                database.ref("game/").update({playerNum: newPlayerNum});
+            }
+        }
+        else if(disconnect === "player1"){
+            database.ref("game/").set(gameReset);
+        }
+        localStorage.setItem("localPlayer", "");
+        database.ref("unloadTest/bef").set("Yo we beforeloaded");
+    }
+
+    /*window.onunload = function() {
+        var disconnect = localStorage.getItem("localPlayer");
+        var newPlayerNum = localStorage.getItem("playerNum") - 1;
+        if(newPlayerNum < 0)
+            newPlayerNum = 0;
+        if(disconnect !== ""){
+            database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
+            if(newPlayerNum <= 0) {
+                database.ref("game/").update({playerNum: newPlayerNum, gameCreated: false});
+            }
+            else {
+                database.ref("game/").update({playerNum: newPlayerNum});
+            }
+        }
+        localStorage.setItem("localPlayer", "");
+        database.ref("unloadTest/unl").set("Yo we unloaded");
+    }*/
+
     /**
      * Prints the local game object to the console when a button is pressed, used for debugging.
      */
