@@ -36,6 +36,13 @@ $(document).ready(function () {
 
     })(jQuery);
 
+    $( "form" ).submit(function( event ) {
+        event.preventDefault();
+        if ($("question-num1").val() === "5") {
+            console.log("You da best!")
+        }
+      });
+
     var fetchToken = "https://opentdb.com/api_token.php?command=request"
 
     // Generates a new token so no questions appear twice, should be kept in onload function
