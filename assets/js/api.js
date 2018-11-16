@@ -36,13 +36,6 @@ $(document).ready(function () {
 
     })(jQuery);
 
-    $( "form" ).submit(function( event ) {
-        event.preventDefault();
-        if ($("question-num1").val() === "5") {
-            console.log("You da best!")
-        }
-      });
-
     var fetchToken = "https://opentdb.com/api_token.php?command=request"
 
     // Generates a new token so no questions appear twice, should be kept in onload function
@@ -69,15 +62,15 @@ $(document).ready(function () {
             var ansLine = $('<ul>')
             var i = 0
             for (i = 0; i < 3; i++) {
-                var wchoice = $('<li class="c">').html(response.results[0].incorrect_answers[i]);
+                var wchoice = $('<li class="answer-choice">').html(response.results[0].incorrect_answers[i]);
                 wchoice.addClass('w');
                 ansLine.append(wchoice)
             }
-            var rchoice = $('<li class="c">').html(response.results[0].correct_answer);
+            var rchoice = $('<li class="answer-choice">').html(response.results[0].correct_answer);
             rchoice.addClass('r');
             ansLine.append(rchoice)
-            $('#answers').append(ansLine);
-            $('.c').shuffle();
+            $('#correct-answer').html(ansLine);
+            $('.answer-choice').shuffle();
 
         })
     })
