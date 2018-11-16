@@ -28,6 +28,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
     <script src="assets/js/config.js"></script>
+    <script src="assets/js/api.js"></script>
     <script src="assets/js/app.js"></script>
 
 </head>
@@ -110,7 +111,7 @@
        
             <!-- Modal footer -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" data-dismiss="modal" id="join">Join Game</button>
+                <button type="button" class="btn btn-danger" id="join">Join Game</button>
             </div>
 
         </div>
@@ -121,13 +122,15 @@
             <div class="col-12 mb-3">
                 <div class="border rounded-top p-4 quest-box shadow">
                     <h3 class="text-center quest-head">Question</h3>
-                    <h4 class="text-center p-3" id="question">Lorem ipsum dolor sit amet consectetur adipisicing elit. Alias possimus
-                        molestias eum, itaque deserunt ad rem dicta voluptate blanditiis nobis, eligendi culpa qui nisi
-                        magnam aspernatur enim adipisci, nesciunt impedit.</h4>
+                    <h3 class="text-center quest-head">Time Remaining: <span id="timer">0</span></h3>
+                    <h4 class="text-center p-3" id="question">Waiting to start game...</h4>
              
 
 <!-- Designated spot for answers -->
-        <div class="text-center" id="correct-answer">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Aliquam quos provident et eius nostrum! Officia magni ducimus vero suscipit repellendus doloremque iste possimus, itaque, ratione, totam nemo rerum nesciunt nostrum.</div>
+        <div class="text-center" id="answers" style="display: none">
+            
+        </div>
+        <button type="button" class="btn btn-danger" id="start" style="display: none">Start Game</button>
     </div>
 </div>
 </div>
@@ -136,11 +139,9 @@
             <div class="col-3" id="card1">
                 <div class="card border rounded-bottom shadow">
                     <div class="text-center card1">
-                        <a target="" href="https://via.placeholder.com/">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar1" src="https://via.placeholder.com/150/150" alt="Image 1">
-                        </a>
                         <h5 class="text-center player-font" id="player1">Player 1</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score"></span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
                     </div>
                 </div>
             </div>
@@ -148,11 +149,9 @@
             <div class="col-3" id="card2">
                 <div class="card border rounded-bottom shadow">
                     <div class="text-center card2">
-                        <a target="" href="https://via.placeholder.com/">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar2" src="https://via.placeholder.com/150/150" alt="Image 1">
-                        </a>
                         <h5 class="text-center player-font" id="player2">Player 2</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score"></span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
 
                     </div>
                 </div>
@@ -161,11 +160,9 @@
             <div class="col-3" id="card3">
                 <div class="card border rounded-bottom shadow card3">
                     <div class="text-center card3">
-                        <a target="" href="https://via.placeholder.com/">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar3" src="https://via.placeholder.com/150/150" alt="Image 1">
-                        </a>
                         <h5 class="text-center player-font" id="player3">Player 3</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score"></span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
                     </div>
                 </div>
             </div>
@@ -173,11 +170,9 @@
             <div class="col-3" id="card4">
                 <div class="card border rounded-bottom shadow">
                     <div class="text-center card4">
-                        <a target="" href="https://via.placeholder.com/">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar4" src="https://via.placeholder.com/150/150" alt="Image 1">
-                        </a>
                         <h5 class="text-center player-font" id="player4">Player 4</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score"></span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
 
                     </div>
                 </div>

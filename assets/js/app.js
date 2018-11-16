@@ -18,12 +18,26 @@ $(document).ready(function(){
         gameFull: false,
         playerNum: 0,
         allAnswered: false,
+        questionData: {
+            correctAnswer: "",
+            answerList: {A: "", B: "", C: "", D: ""},
+            question: "",
+            questionNum: 1,
+            timerValue: 0
+        },
         reset: function() {
             this.players = {
                 player1: {name: "", answer: "", score: 0},
                 player2: {name: "", answer: "", score: 0},
                 player3: {name: "", answer: "", score: 0},
                 player4: {name: "", answer: "", score: 0},
+            },
+            this.questionData = {
+                correctAnswer: "",
+                answerList: {A: "", B: "", C: "", D: ""},
+                question: "",
+                questionNum: 1,
+                timerValue: 0
             },
             this.isHost = false;
             this.playerCount = 0;
@@ -53,11 +67,16 @@ $(document).ready(function(){
         allAnswered: false,
         questionData: {
             correctAnswer: "",
-            answerList: {A: "no", B: "nope", C: "AH", D: "nono"},
+            answerList: {A: "", B: "", C: "", D: ""},
             question: "",
-            questionNum: 1
+            questionNum: 1,
+            timerValue: 15
         }
     }
+
+    var intervalID;
+//============================== Start Firebase Logic ==================================================>>
+
     /**Variable for the firebase database */
     var database = firebase.database();
     //Remove comment to reset game on page load
@@ -152,31 +171,42 @@ $(document).ready(function(){
         var newPlayerNum = 0;
         if(game.players.player1.name !== ""){
             $("#player1").text(game.players.player1.name);
+            $("#avatar1").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png")
             newPlayerNum++;
         }
         else{
             $("#player1").text("Player 1");
+            $("#avatar1").attr("src", "https://api.adorable.io/avatars/285/player1.png")
         }
         if(game.players.player2.name !== ""){
             $("#player2").text(game.players.player2.name);
+            $("#avatar2").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png")
+            if(game.isHost){
+                $("#start").css("display", "block");
+            }
             newPlayerNum++;
         }
         else{
             $("#player2").text("Player 2");
+            $("#avatar2").attr("src", "https://api.adorable.io/avatars/285/player2.png")
         }
         if(game.players.player3.name !== ""){
             $("#player3").text(game.players.player3.name);
+            $("#avatar3").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png")
             newPlayerNum++;
         }
         else{
             $("#player3").text("Player 3");
+            $("#avatar3").attr("src", "https://api.adorable.io/avatars/285/player3.png")
         }
         if(game.players.player4.name !== ""){
             $("#player4").text(game.players.player4.name);
+            $("#avatar4").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player4.name + ".png")
             newPlayerNum++;
         }
         else{
             $("#player4").text("Player 4");
+            $("#avatar4").attr("src", "https://api.adorable.io/avatars/285/player4.png")
         }
         if(newPlayerNum != game.playerNum) {
             game.playerNum = newPlayerNum;
@@ -201,10 +231,10 @@ $(document).ready(function(){
     database.ref("game/gameStarted").on("value", function(snapshot){
         game.gameStarted = snapshot.val();
         if(game.gameStarted){
-            $("#game").css("display", "block");
+            $("#answers").css("display", "block");
         }
         else{
-            $("#game").css("display", "none");
+            $("#answers").css("display", "none");
         }
     });
     /**
@@ -214,23 +244,32 @@ $(document).ready(function(){
     database.ref("game/playerCount").on("value", function(snapshot){
         game.playerCount = snapshot.val();
     });
-    /*
-    database.ref("game/").onDisconnect().update({disconnect: localStorage.getItem("localPlayer") + " has disconnected."}).then(function(){
-        var disconnect = localStorage.getItem("localPlayer");
-        var newPlayerNum = localStorage.getItem("playerNum") - 1;
-        if(disconnect !== ""){
-            database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
-            if(newPlayerNum <= 0) {
-                database.ref("game/").update({playerNum: newPlayerNum, gameCreated: false});
-            }
-            else {
-                database.ref("game/").update({playerNum: newPlayerNum});
-            }
+    /**
+     * 
+     */
+    database.ref("game/questionData").on("value", function(snapshot){
+        game.questionData = snapshot.val();
+        $("#question").html(game.questionData.question);
+        $("#timer").text(game.questionData.timerValue);
+        var answers = [game.questionData.answerList.A, game.questionData.answerList.B, game.questionData.answerList.C, game.questionData.answerList.D];
+        $("#answers").empty();
+        for(var i = 0; i < 4; i++) {
+            var randomNum = Math.floor(Math.random() * Math.floor(answers.length));
+            var answerPick = answers.splice(randomNum, 1);
+            var newAnswerDiv = $("<div>");
+            $(newAnswerDiv).html(answerPick);
+            $(newAnswerDiv).addClass("answer-choice");
+            $("#answers").append(newAnswerDiv);
+            console.log("Answer: " + answerPick);
         }
-        localStorage.setItem("localPlayer", "");
-        database.ref("unloadTest/").push("Yo we disconnected");
-    });*/
+        if(game.gameStarted) {
+            intervalID = setInterval(decrement, 1000);
+        }
+    });
 
+    //============================== End Firebase Logic ==================================================>>
+
+//============================== Start Game Logic ====================================================>>
 
     /**
      * Is called when the 'Create Game' button is clicked by the host,
@@ -262,7 +301,6 @@ $(document).ready(function(){
         }
         database.ref("game/").update(updates);
         $("#myModal").modal("hide");
-        $("#start").css("display", "block");
     });
     /**
      * Is called when the 'Join Game' button is clicked by a new player,
@@ -314,6 +352,9 @@ $(document).ready(function(){
         if(game.playerNum >= 2){
             game.gameStarted = true;
             database.ref("game/gameStarted").set(true);
+            if(game.isHost) {
+                startGame();
+            }
         }
     });
     /**
@@ -329,13 +370,14 @@ $(document).ready(function(){
      * Is called when an answer choice is clicked, will only pass a value when the viewer is a
      * player and not a spectator.
      */
-    $(".answer-choice").on("click", function(){
+    $(document).on("click", ".answer-choice", function(){
         if(game.localPlayer !== ""){
-            var answer = $(this).attr("value");
-            database.ref("game/answerChoices/" + game.localPlayer).set(answer);
+            var answer = $(this).text();
+            console.log(answer);
+            database.ref("game/players/" + game.localPlayer + "/answer").set(answer);
             var numAnswered = 0;
             for(var i = 1; i <= game.playerNum; i++) {
-                database.ref("game/answerChoices/player" + i).once("value").then(function(snapshot){
+                database.ref("game/players/player" + i + "/answer").once("value").then(function(snapshot){
                     if(snapshot.val() !== "") {
                         numAnswered++;
                     }
@@ -347,6 +389,10 @@ $(document).ready(function(){
             }    
         }
     });
+
+    startGame = function() {
+        getNewQuestion();
+    };  
 
     window.onbeforeunload = function(e){
         var disconnect = localStorage.getItem("localPlayer");
@@ -366,24 +412,23 @@ $(document).ready(function(){
         localStorage.setItem("localPlayer", "");
         database.ref("unloadTest/bef").set("Yo we beforeloaded");
     }
-
-    /*window.onunload = function() {
-        var disconnect = localStorage.getItem("localPlayer");
-        var newPlayerNum = localStorage.getItem("playerNum") - 1;
-        if(newPlayerNum < 0)
-            newPlayerNum = 0;
-        if(disconnect !== ""){
-            database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
-            if(newPlayerNum <= 0) {
-                database.ref("game/").update({playerNum: newPlayerNum, gameCreated: false});
-            }
-            else {
-                database.ref("game/").update({playerNum: newPlayerNum});
-            }
+    
+    decrement = function() {
+        clearInterval(intervalID);
+        if(game.questionData.timerValue > 0){
+            game.questionData.timerValue--;
+            $("#timer").text(game.questionData.timerValue);
+            intervalID = setInterval(decrement, 1000);
         }
-        localStorage.setItem("localPlayer", "");
-        database.ref("unloadTest/unl").set("Yo we unloaded");
-    }*/
+        else {
+            game.questionData.timerValue = 0;
+            timeUp();
+        }
+    }
+
+    timeUp = function() {
+        console.log("Times up");
+    }
 
     /**
      * Prints the local game object to the console when a button is pressed, used for debugging.
@@ -392,4 +437,7 @@ $(document).ready(function(){
     $("button").on("click", function(){
         console.log(game);
     })*/
+
+    //============================== End Game Logic ====================================================>>
+
 });
