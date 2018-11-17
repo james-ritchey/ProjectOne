@@ -46,8 +46,7 @@
 
                     <!-- Modal Header -->
                     <div class="modal-header">
-                        <h4 class="modal-title">Make Your Selections</h4>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">New Game</h4>
                     </div>
 
                     <!-- Modal body -->
@@ -58,27 +57,7 @@
                      
 
                     <div class="modal-body text-center">
-                        <h6 id="question1" class="text-center">How many questions?</h6>
-                        <div class="form-check form-check-inline text-center mb-4">
-                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="question-num1" value="option1">
-                            <label class="form-check-label" for="question-num1">5</label>
-                        </div>
                         
-                        <div class="form-check form-check-inline text-center">
-                            <input class="form-check-input" type="radio" name="inlineRadioOptions" id="question-num2" value="option2">
-                            <label class="form-check-label" for="question-num2">10</label>
-                        </div>
-
-                        <h6 id="question2" class="text-center">Question time?</h6>
-                        <div class="form-check form-check-inline text-center mb-4">
-                            <input class="form-check-input" type="radio" name="inlineRadioOptions1" id="question-time1" value="option1">
-                            <label class="form-check-label" for="question-time1">10 seconds</label>
-                        </div>
-
-                        <div class="form-check form-check-inline text-center">
-                            <input class="form-check-input" type="radio" name="inlineRadioOptions1" id="question-time2" value="option2">
-                            <label class="form-check-label" for="question-time2">30 seconds</label>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -141,7 +120,7 @@
                     <div class="text-center card1">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar1" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player1">Player 1</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="player1-score">0</span></h6>
                     </div>
                 </div>
             </div>
@@ -151,7 +130,7 @@
                     <div class="text-center card2">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar2" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player2">Player 2</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="player2-score">0</span></h6>
 
                     </div>
                 </div>
@@ -162,7 +141,7 @@
                     <div class="text-center card3">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar3" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player3">Player 3</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="player3-score">0</span></h6>
                     </div>
                 </div>
             </div>
@@ -172,7 +151,7 @@
                     <div class="text-center card4">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar4" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player4">Player 4</h5>
-                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="score">0</span></h6>
+                        <h6 class="text-center num-correct mb-2">Number Correct: <span id="player4-score">0</span></h6>
 
                     </div>
                 </div>
@@ -194,16 +173,18 @@
 
                     <!-- Modal Header -->
                     <div class="modal-header">
-                        <h4 class="modal-title">You Win!!</h4>
+                        <h4 id="winner-name">You Win!!</h4>
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
 
                     <!-- Modal body -->
-                    <div id="winplayer-avatar"></div>
+                    <div id="winplayer-avatar-div">
+                        <img class="text-center card-img-top mb-2 p-2" id="win-avatar" src="" alt="Winner">
+                    </div>
 
                     <!-- Modal footer -->
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-warning text-dark" data-dismiss="modal">Play Again</button>
+                        <button type="button" class="btn btn-warning text-dark" data-dismiss="modal" id="replay">Play Again</button>
                     </div>
 
                 </div>

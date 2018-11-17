@@ -18,6 +18,7 @@ $(document).ready(function(){
         gameFull: false,
         playerNum: 0,
         allAnswered: false,
+        questionMax: 10,
         questionData: {
             correctAnswer: "",
             answerList: {A: "", B: "", C: "", D: ""},
@@ -65,6 +66,7 @@ $(document).ready(function(){
         gameStarted: false,
         gameFull: false,
         allAnswered: false,
+        questionMax: 10,
         questionData: {
             correctAnswer: "",
             answerList: {A: "", B: "", C: "", D: ""},
@@ -171,42 +173,43 @@ $(document).ready(function(){
         var newPlayerNum = 0;
         if(game.players.player1.name !== ""){
             $("#player1").text(game.players.player1.name);
-            $("#avatar1").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png")
+            $("#avatar1").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            $("#player1-score").text(game.players.player1.score);
             newPlayerNum++;
         }
         else{
             $("#player1").text("Player 1");
-            $("#avatar1").attr("src", "https://api.adorable.io/avatars/285/player1.png")
+            $("#avatar1").attr("src", "assets/images/default_avatar.png");
         }
         if(game.players.player2.name !== ""){
             $("#player2").text(game.players.player2.name);
-            $("#avatar2").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png")
-            if(game.isHost){
-                $("#start").css("display", "block");
-            }
+            $("#avatar2").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            $("#player2-score").text(game.players.player2.score);
             newPlayerNum++;
         }
         else{
             $("#player2").text("Player 2");
-            $("#avatar2").attr("src", "https://api.adorable.io/avatars/285/player2.png")
+            $("#avatar2").attr("src", "assets/images/default_avatar.png");
         }
         if(game.players.player3.name !== ""){
             $("#player3").text(game.players.player3.name);
-            $("#avatar3").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png")
+            $("#avatar3").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png");
+            $("#player3-score").text(game.players.player3.score);
             newPlayerNum++;
         }
         else{
             $("#player3").text("Player 3");
-            $("#avatar3").attr("src", "https://api.adorable.io/avatars/285/player3.png")
+            $("#avatar3").attr("src", "assets/images/default_avatar.png");
         }
         if(game.players.player4.name !== ""){
             $("#player4").text(game.players.player4.name);
-            $("#avatar4").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player4.name + ".png")
+            $("#avatar4").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player4.name + ".png");
+            $("#player4-score").text(game.players.player4.score);
             newPlayerNum++;
         }
         else{
             $("#player4").text("Player 4");
-            $("#avatar4").attr("src", "https://api.adorable.io/avatars/285/player4.png")
+            $("#avatar4").attr("src", "assets/images/default_avatar.png");
         }
         if(newPlayerNum != game.playerNum) {
             game.playerNum = newPlayerNum;
@@ -232,9 +235,17 @@ $(document).ready(function(){
         game.gameStarted = snapshot.val();
         if(game.gameStarted){
             $("#answers").css("display", "block");
+            if(game.players.player3.name === "") {
+                $("#card3").css("display", "none");
+            }
+            if(game.players.player4.name === "") {
+                $("#card4").css("display", "none");
+            }
         }
         else{
             $("#answers").css("display", "none");
+            $("#card3").css("display", "inline");
+            $("#card4").css("display", "inline");
         }
     });
     /**
@@ -278,29 +289,34 @@ $(document).ready(function(){
      * to 'true'.
      */
     $("#create").on("click", function(){
-        game.players.player1.name = $("#host-name").val().trim();
-        game.localPlayer = "player1";
-        localStorage.setItem("localPlayer", "player1");
-        $("#host-name").val("");
-        game.playerCount = 4;
-        //$("#players").val(0);
-        game.isHost = true;
-        game.gameCreated = true;
-        game.playerNum++;
-        localStorage.setItem("playerNum", game.playerNum);
-        var updates = {
-            players: {
-                player1: {name: game.players.player1.name, answer: "", score: 0},
-                player2: {name: game.players.player2.name, answer: "", score: 0},
-                player3: {name: game.players.player3.name, answer: "", score: 0},
-                player4: {name: game.players.player4.name, answer: "", score: 0},
-            },
-            playerCount: game.playerCount,
-            gameCreated: true,
-            playerNum: game.playerNum
+        if($("#host-name").val().trim() !== ""){
+            game.players.player1.name = $("#host-name").val().trim();
+            game.localPlayer = "player1";
+            localStorage.setItem("localPlayer", "player1");
+            $("#host-name").val("");
+            game.playerCount = 4;
+            //$("#players").val(0);
+            game.isHost = true;
+            game.gameCreated = true;
+            game.playerNum++;
+            localStorage.setItem("playerNum", game.playerNum);
+            var updates = {
+                players: {
+                    player1: {name: game.players.player1.name, answer: "", score: 0},
+                    player2: {name: game.players.player2.name, answer: "", score: 0},
+                    player3: {name: game.players.player3.name, answer: "", score: 0},
+                    player4: {name: game.players.player4.name, answer: "", score: 0},
+                },
+                playerCount: game.playerCount,
+                gameCreated: true,
+                playerNum: game.playerNum
+            }
+            database.ref("game/").update(updates);
+            $("#myModal").modal("hide");
+            if(game.isHost){
+                $("#start").css("display", "block");
+            }
         }
-        database.ref("game/").update(updates);
-        $("#myModal").modal("hide");
     });
     /**
      * Is called when the 'Join Game' button is clicked by a new player,
@@ -372,7 +388,7 @@ $(document).ready(function(){
      */
     $(document).on("click", ".answer-choice", function(){
         if(game.localPlayer !== ""){
-            var answer = $(this).text();
+            var answer = $(this).html();
             console.log(answer);
             database.ref("game/players/" + game.localPlayer + "/answer").set(answer);
             var numAnswered = 0;
@@ -392,6 +408,7 @@ $(document).ready(function(){
 
     startGame = function() {
         getNewQuestion();
+        $("#start").css("display", "none");
     };  
 
     window.onbeforeunload = function(e){
@@ -428,7 +445,109 @@ $(document).ready(function(){
 
     timeUp = function() {
         console.log("Times up");
+        var answer = "";
+        var score = 0;
+        database.ref("game/players/" + game.localPlayer).once("value").then(function(snapshot){
+            answer = snapshot.val().answer;
+            score = snapshot.val().score;
+                if(answer === game.questionData.correctAnswer) {
+                    score++;
+                    $("#" + game.localPlayer + "-score").text(score);
+                    database.ref("game/players/" + game.localPlayer + "/score").set(score);
+                }
+        });
+        game.questionData.questionNum++;
+        if(game.questionData.questionNum > game.questionMax) {
+            setTimeout(endGame, 2000);
+        }
+        else {
+            if(game.isHost) {
+                setTimeout(getNewQuestion, 3000);
+            }
+        }
     }
+
+    endGame = function() {
+        var p1score = game.players.player1.score;
+        var p2score = game.players.player2.score;
+        var p3score = game.players.player3.score;
+        var p4score = game.players.player4.score;
+        
+        if(game.playerNum === 2) {
+            if(p1score > p2score) {
+                $("#winner-name").text(game.players.player1.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            }
+            else if(p2score > p1score) {
+                $("#winner-name").text(game.players.player2.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            }
+            else if(p1score === p2score) {
+                $("#winner-name").text("It's a draw!");
+                $("#win-avatar").css("display", "none");
+            }
+        }
+        else if(game.playerNum === 3) {
+            if(p1score > p2score && p1score > p3score) {
+                $("#winner-name").text(game.players.player1.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            }
+            else if(p2score > p1score && p2score > p3score) {
+                $("#winner-name").text(game.players.player2.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            }
+            else if(p3score > p1score && p3score > p2score) {
+                $("#winner-name").text(game.players.player3.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png")
+            }
+            else if(p3score === p1score || p3score === p2score) {
+                $("#winner-name").text("It's a draw!");
+                $("#win-avatar").css("display", "none");
+            }
+        }
+        else if(game.playerNum === 4) {
+            if(p1score > p2score && p1score > p3score && p1score > p4score) {
+                $("#winner-name").text(game.players.player1.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            }
+            else if(p2score > p1score && p2score > p3score && p2score > p4score) {
+                $("#winner-name").text(game.players.player2.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            }
+            else if(p3score > p1score && p3score > p2score && p3score > p4score) {
+                $("#winner-name").text(game.players.player3.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png")
+            }
+            else if(p4score > p1score && p4score > p3score && p4score > p2score) {
+                $("#winner-name").text(game.players.player4.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player4.name + ".png")
+            }            
+            else if(p3score === p1score || p3score === p2score || p3score === p4score) {
+                $("#winner-name").text("It's a draw!");
+                $("#win-avatar").css("display", "none");
+            }
+
+        }
+        $("#modal2").modal("show");
+    }
+
+    $("#replay").on("click", function(){
+        database.ref("game/").set(gameReset);
+        $("#myModal").modal("show");
+        $("#win-avatar").css("display", "inline");
+    });
+
+    $(document).on({
+        mouseenter: function() {
+            if(game.localPlayer !== "") {
+                $(this).css("background", "#040475");
+                $(this).css("color", "white");
+            }
+    },  mouseleave: function() {
+            $(this).css("background", "none");
+            $(this).css("color", "#040475");
+    }
+    }, ".answer-choice");
 
     /**
      * Prints the local game object to the console when a button is pressed, used for debugging.
