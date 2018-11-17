@@ -18,10 +18,28 @@ $(document).ready(function(){
         gameFull: false,
         playerNum: 0,
         allAnswered: false,
+        questionMax: 10,
+        questionData: {
+            correctAnswer: "",
+            answerList: {A: "", B: "", C: "", D: ""},
+            question: "",
+            questionNum: 1,
+            timerValue: 0
+        },
         reset: function() {
-            this.players = { player1: "", player2: "", player3: "", player4: ""};
-            this.answerChoices = { player1: "", player2: "", player3: "", player4: ""};
-            this.scores = { player1: 0, player2: 0, player3: 0, player4: 0};
+            this.players = {
+                player1: {name: "", answer: "", score: 0},
+                player2: {name: "", answer: "", score: 0},
+                player3: {name: "", answer: "", score: 0},
+                player4: {name: "", answer: "", score: 0},
+            },
+            this.questionData = {
+                correctAnswer: "",
+                answerList: {A: "", B: "", C: "", D: ""},
+                question: "",
+                questionNum: 1,
+                timerValue: 0
+            },
             this.isHost = false;
             this.playerCount = 0;
             this.gameCreated = false;
@@ -42,19 +60,25 @@ $(document).ready(function(){
             player3: {name: "", answer: "", score: 0},
             player4: {name: "", answer: "", score: 0},
         },
-        playerCount: 0,
+        playerCount: 4,
         playerNum: 0,
         gameCreated: false,
         gameStarted: false,
         gameFull: false,
         allAnswered: false,
+        questionMax: 10,
         questionData: {
             correctAnswer: "",
-            answerList: {A: "no", B: "nope", C: "AH", D: "nono"},
+            answerList: {A: "", B: "", C: "", D: ""},
             question: "",
-            questionNum: 1
+            questionNum: 1,
+            timerValue: 15
         }
     }
+
+    var intervalID;
+//============================== Start Firebase Logic ==================================================>>
+
     /**Variable for the firebase database */
     var database = firebase.database();
     //Remove comment to reset game on page load
@@ -72,6 +96,7 @@ $(document).ready(function(){
         game.gameStarted = snapshot.val().gameStarted;
         game.gameFull = snapshot.val().gameFull;
         game.playerNum = snapshot.val().playerNum;
+        localStorage.setItem("playerNum", snapshot.val().playerNum);
         
         if(snapshot.val().gameCreated && !(snapshot.val().gameFull)){
             $("#playerModal").modal("show"); 
@@ -83,7 +108,7 @@ $(document).ready(function(){
             $("#myModal").modal("show");
         }
 
-        if(game.playerNum <= 0) {
+        if(game.playerNum < 0) {
             game.playerNum = 0;
             database.ref("game/").update({playerNum: game.playerNum});
             localStorage.setItem("playerNum", 0);
@@ -145,28 +170,60 @@ $(document).ready(function(){
      */
     database.ref("game/players").on("value", function(snapshot){
         game.players = snapshot.val();
-        if(game.players.player1.name !== "")
+        var newPlayerNum = 0;
+        if(game.players.player1.name !== ""){
             $("#player1").text(game.players.player1.name);
-        else
+            $("#avatar1").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            $("#player1-score").text(game.players.player1.score);
+            newPlayerNum++;
+        }
+        else{
             $("#player1").text("Player 1");
-        if(game.players.player2.name !== "")
+            $("#avatar1").attr("src", "assets/images/default_avatar.png");
+        }
+        if(game.players.player2.name !== ""){
             $("#player2").text(game.players.player2.name);
-        else
+            $("#avatar2").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            $("#player2-score").text(game.players.player2.score);
+            newPlayerNum++;
+        }
+        else{
             $("#player2").text("Player 2");
-        if(game.players.player3.name !== "")
+            $("#avatar2").attr("src", "assets/images/default_avatar.png");
+        }
+        if(game.players.player3.name !== ""){
             $("#player3").text(game.players.player3.name);
-        else
+            $("#avatar3").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png");
+            $("#player3-score").text(game.players.player3.score);
+            newPlayerNum++;
+        }
+        else{
             $("#player3").text("Player 3");
-        if(game.players.player4.name !== "")
+            $("#avatar3").attr("src", "assets/images/default_avatar.png");
+        }
+        if(game.players.player4.name !== ""){
             $("#player4").text(game.players.player4.name);
-        else
+            $("#avatar4").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player4.name + ".png");
+            $("#player4-score").text(game.players.player4.score);
+            newPlayerNum++;
+        }
+        else{
             $("#player4").text("Player 4");
+            $("#avatar4").attr("src", "assets/images/default_avatar.png");
+        }
+        if(newPlayerNum != game.playerNum) {
+            game.playerNum = newPlayerNum;
+        }
+        database.ref("game/playerNum").set(game.playerNum);
         console.log("We know the players changed to " + JSON.stringify(game.players));
     });
 
     database.ref("game/playerNum").on("value", function(snapshot){
         game.playerNum = snapshot.val();
         localStorage.setItem("playerNum", game.playerNum);
+        if(game.playerNum === 0 && game.gameCreated) {
+            database.ref("game/gameCreated").set(false);
+        }
     });
     /**
      * Is called when the gameStarted value changes on the database,
@@ -177,10 +234,18 @@ $(document).ready(function(){
     database.ref("game/gameStarted").on("value", function(snapshot){
         game.gameStarted = snapshot.val();
         if(game.gameStarted){
-            $("#game").css("display", "block");
+            $("#answers").css("display", "block");
+            if(game.players.player3.name === "") {
+                $("#card3").css("display", "none");
+            }
+            if(game.players.player4.name === "") {
+                $("#card4").css("display", "none");
+            }
         }
         else{
-            $("#game").css("display", "none");
+            $("#answers").css("display", "none");
+            $("#card3").css("display", "inline");
+            $("#card4").css("display", "inline");
         }
     });
     /**
@@ -190,22 +255,32 @@ $(document).ready(function(){
     database.ref("game/playerCount").on("value", function(snapshot){
         game.playerCount = snapshot.val();
     });
-    
-    database.ref("game/").onDisconnect().update({disconnect: localStorage.getItem("localPlayer") + " has disconnected."}).then(function(){
-        var disconnect = localStorage.getItem("localPlayer");
-        if(disconnect !== ""){
-            database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
-            database.ref("game/").update({playerNum: localStorage.getItem("playerNum") - 1});
+    /**
+     * 
+     */
+    database.ref("game/questionData").on("value", function(snapshot){
+        game.questionData = snapshot.val();
+        $("#question").html(game.questionData.question);
+        $("#timer").text(game.questionData.timerValue);
+        var answers = [game.questionData.answerList.A, game.questionData.answerList.B, game.questionData.answerList.C, game.questionData.answerList.D];
+        $("#answers").empty();
+        for(var i = 0; i < 4; i++) {
+            var randomNum = Math.floor(Math.random() * Math.floor(answers.length));
+            var answerPick = answers.splice(randomNum, 1);
+            var newAnswerDiv = $("<div>");
+            $(newAnswerDiv).html(answerPick);
+            $(newAnswerDiv).addClass("answer-choice");
+            $("#answers").append(newAnswerDiv);
+            console.log("Answer: " + answerPick);
         }
-        database.ref("game/playerNum").once("value").then(function(snapshot){
-            if(snapshot.val() <= 0) {
-                database.ref("game/gameCreated").set(false);
-            }
-        });
-        localStorage.setItem("localPlayer", "");
-        localStorage.setItem("playerNum", 0);
+        if(game.gameStarted) {
+            intervalID = setInterval(decrement, 1000);
+        }
     });
 
+    //============================== End Firebase Logic ==================================================>>
+
+//============================== Start Game Logic ====================================================>>
 
     /**
      * Is called when the 'Create Game' button is clicked by the host,
@@ -214,30 +289,34 @@ $(document).ready(function(){
      * to 'true'.
      */
     $("#create").on("click", function(){
-        game.players.player1.name = $("#host-name").val().trim();
-        game.localPlayer = "player1";
-        localStorage.setItem("localPlayer", "player1");
-        $("#host-name").val("");
-        game.playerCount = 4;
-        //$("#players").val(0);
-        game.isHost = true;
-        game.gameCreated = true;
-        game.playerNum++;
-        localStorage.setItem("playerNum", game.playerNum);
-        var updates = {
-            players: {
-                player1: {name: game.players.player1.name, answer: "", score: 0},
-                player2: {name: game.players.player2.name, answer: "", score: 0},
-                player3: {name: game.players.player3.name, answer: "", score: 0},
-                player4: {name: game.players.player4.name, answer: "", score: 0},
-            },
-            playerCount: game.playerCount,
-            gameCreated: true,
-            playerNum: game.playerNum
+        if($("#host-name").val().trim() !== ""){
+            game.players.player1.name = $("#host-name").val().trim();
+            game.localPlayer = "player1";
+            localStorage.setItem("localPlayer", "player1");
+            $("#host-name").val("");
+            game.playerCount = 4;
+            //$("#players").val(0);
+            game.isHost = true;
+            game.gameCreated = true;
+            game.playerNum++;
+            localStorage.setItem("playerNum", game.playerNum);
+            var updates = {
+                players: {
+                    player1: {name: game.players.player1.name, answer: "", score: 0},
+                    player2: {name: game.players.player2.name, answer: "", score: 0},
+                    player3: {name: game.players.player3.name, answer: "", score: 0},
+                    player4: {name: game.players.player4.name, answer: "", score: 0},
+                },
+                playerCount: game.playerCount,
+                gameCreated: true,
+                playerNum: game.playerNum
+            }
+            database.ref("game/").update(updates);
+            $("#myModal").modal("hide");
+            if(game.isHost){
+                $("#start").css("display", "block");
+            }
         }
-        database.ref("game/").update(updates);
-        $("#myModal").modal("hide");
-        $("#start").css("display", "block");
     });
     /**
      * Is called when the 'Join Game' button is clicked by a new player,
@@ -254,7 +333,6 @@ $(document).ready(function(){
                     playerList.player2.name = $("#player-name").val().trim();
                     game.localPlayer = "player2";
                     game.playerNum = 2;
-                    localStorage.setItem("playerNum", game.playerNum);
                     if(game.playerCount == 2)
                         game.gameFull = true;
                 }
@@ -262,7 +340,6 @@ $(document).ready(function(){
                     playerList.player3.name = $("#player-name").val().trim();
                     game.localPlayer = "player3";
                     game.playerNum = 3;
-                    localStorage.setItem("playerNum", game.playerNum);
                     if(game.playerCount == 3)
                         game.gameFull = true;
                 }
@@ -270,14 +347,14 @@ $(document).ready(function(){
                     playerList.player4.name = $("#player-name").val().trim();
                     game.localPlayer = "player4";
                     game.playerNum = 4;
-                    localStorage.setItem("playerNum", game.playerNum);
                     game.gameFull = true;
                 }
                 database.ref("game/players").update(playerList);
                 database.ref("game/gameFull").set(game.gameFull);
                 localStorage.setItem("localPlayer", game.localPlayer);
+                localStorage.setItem("playerNum", game.playerNum);
                 console.log(JSON.stringify(playerList));
-                console.log("We tried to join as " + $("#player-name").val().trim());
+                console.log("We tried to join as " + game.localPlayer);
                 $("#join-name").val("");
                 $("#playerModal").modal("toggle");
             });
@@ -291,6 +368,9 @@ $(document).ready(function(){
         if(game.playerNum >= 2){
             game.gameStarted = true;
             database.ref("game/gameStarted").set(true);
+            if(game.isHost) {
+                startGame();
+            }
         }
     });
     /**
@@ -306,13 +386,14 @@ $(document).ready(function(){
      * Is called when an answer choice is clicked, will only pass a value when the viewer is a
      * player and not a spectator.
      */
-    $(".answer-choice").on("click", function(){
+    $(document).on("click", ".answer-choice", function(){
         if(game.localPlayer !== ""){
-            var answer = $(this).attr("value");
-            database.ref("game/answerChoices/" + game.localPlayer).set(answer);
+            var answer = $(this).html();
+            console.log(answer);
+            database.ref("game/players/" + game.localPlayer + "/answer").set(answer);
             var numAnswered = 0;
             for(var i = 1; i <= game.playerNum; i++) {
-                database.ref("game/answerChoices/player" + i).once("value").then(function(snapshot){
+                database.ref("game/players/player" + i + "/answer").once("value").then(function(snapshot){
                     if(snapshot.val() !== "") {
                         numAnswered++;
                     }
@@ -324,6 +405,150 @@ $(document).ready(function(){
             }    
         }
     });
+
+    startGame = function() {
+        getNewQuestion();
+        $("#start").css("display", "none");
+    };  
+
+    window.onbeforeunload = function(e){
+        var disconnect = localStorage.getItem("localPlayer");
+        var newPlayerNum = localStorage.getItem("playerNum") - 1;
+        if(disconnect !== "" && disconnect !== "player1"){
+            database.ref("game/players/" + disconnect).update({name: "", answer: "", score: 0});
+            if(newPlayerNum <= 0) {
+                database.ref("game/").update({playerNum: newPlayerNum, gameCreated: false});
+            }
+            else {
+                database.ref("game/").update({playerNum: newPlayerNum});
+            }
+        }
+        else if(disconnect === "player1"){
+            database.ref("game/").set(gameReset);
+        }
+        localStorage.setItem("localPlayer", "");
+        database.ref("unloadTest/bef").set("Yo we beforeloaded");
+    }
+    
+    decrement = function() {
+        clearInterval(intervalID);
+        if(game.questionData.timerValue > 0){
+            game.questionData.timerValue--;
+            $("#timer").text(game.questionData.timerValue);
+            intervalID = setInterval(decrement, 1000);
+        }
+        else {
+            game.questionData.timerValue = 0;
+            timeUp();
+        }
+    }
+
+    timeUp = function() {
+        console.log("Times up");
+        var answer = "";
+        var score = 0;
+        database.ref("game/players/" + game.localPlayer).once("value").then(function(snapshot){
+            answer = snapshot.val().answer;
+            score = snapshot.val().score;
+                if(answer === game.questionData.correctAnswer) {
+                    score++;
+                    $("#" + game.localPlayer + "-score").text(score);
+                    database.ref("game/players/" + game.localPlayer + "/score").set(score);
+                }
+        });
+        game.questionData.questionNum++;
+        if(game.questionData.questionNum > game.questionMax) {
+            setTimeout(endGame, 2000);
+        }
+        else {
+            if(game.isHost) {
+                setTimeout(getNewQuestion, 3000);
+            }
+        }
+    }
+
+    endGame = function() {
+        var p1score = game.players.player1.score;
+        var p2score = game.players.player2.score;
+        var p3score = game.players.player3.score;
+        var p4score = game.players.player4.score;
+        
+        if(game.playerNum === 2) {
+            if(p1score > p2score) {
+                $("#winner-name").text(game.players.player1.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            }
+            else if(p2score > p1score) {
+                $("#winner-name").text(game.players.player2.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            }
+            else if(p1score === p2score) {
+                $("#winner-name").text("It's a draw!");
+                $("#win-avatar").css("display", "none");
+            }
+        }
+        else if(game.playerNum === 3) {
+            if(p1score > p2score && p1score > p3score) {
+                $("#winner-name").text(game.players.player1.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            }
+            else if(p2score > p1score && p2score > p3score) {
+                $("#winner-name").text(game.players.player2.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            }
+            else if(p3score > p1score && p3score > p2score) {
+                $("#winner-name").text(game.players.player3.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png")
+            }
+            else if(p3score === p1score || p3score === p2score) {
+                $("#winner-name").text("It's a draw!");
+                $("#win-avatar").css("display", "none");
+            }
+        }
+        else if(game.playerNum === 4) {
+            if(p1score > p2score && p1score > p3score && p1score > p4score) {
+                $("#winner-name").text(game.players.player1.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player1.name + ".png");
+            }
+            else if(p2score > p1score && p2score > p3score && p2score > p4score) {
+                $("#winner-name").text(game.players.player2.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player2.name + ".png");
+            }
+            else if(p3score > p1score && p3score > p2score && p3score > p4score) {
+                $("#winner-name").text(game.players.player3.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player3.name + ".png")
+            }
+            else if(p4score > p1score && p4score > p3score && p4score > p2score) {
+                $("#winner-name").text(game.players.player4.name + " Wins!");
+                $("#win-avatar").attr("src", "https://api.adorable.io/avatars/285/" + game.players.player4.name + ".png")
+            }            
+            else if(p3score === p1score || p3score === p2score || p3score === p4score) {
+                $("#winner-name").text("It's a draw!");
+                $("#win-avatar").css("display", "none");
+            }
+
+        }
+        $("#modal2").modal("show");
+    }
+
+    $("#replay").on("click", function(){
+        database.ref("game/").set(gameReset);
+        $("#myModal").modal("show");
+        $("#win-avatar").css("display", "inline");
+    });
+
+    $(document).on({
+        mouseenter: function() {
+            if(game.localPlayer !== "") {
+                $(this).css("background", "#040475");
+                $(this).css("color", "white");
+            }
+    },  mouseleave: function() {
+            $(this).css("background", "none");
+            $(this).css("color", "#040475");
+    }
+    }, ".answer-choice");
+
     /**
      * Prints the local game object to the console when a button is pressed, used for debugging.
      */
@@ -331,4 +556,7 @@ $(document).ready(function(){
     $("button").on("click", function(){
         console.log(game);
     })*/
+
+    //============================== End Game Logic ====================================================>>
+
 });
