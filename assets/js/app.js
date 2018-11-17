@@ -457,7 +457,7 @@ $(document).ready(function(){
                 }
         });
         game.questionData.questionNum++;
-        if(game.questionData.questionNum > game.questionMax) {
+        if(game.questionData.questionNum > 2) {
             setTimeout(endGame, 2000);
         }
         else {
