@@ -12,8 +12,9 @@
 
     <!-- Our CSS style sheet -->
     <link rel="stylesheet" href="assets/css/style.css">
-    <link href="https://fonts.googleapis.com/css?family=Bowlby+One+SC|Megrim|Open+Sans+Condensed:300|Pavanam|Roboto|Voltaire" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css?family=Bowlby+One+SC|Megrim|Open+Sans+Condensed:300|Pavanam|Roboto|Voltaire|Rubik"
+        rel="stylesheet">
+
     <!-- Added a link to Bootstrap-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
 
@@ -35,9 +36,15 @@
 
 <body>
 
-<h1 class="header text-center p-1 mb-2">Trivia</h1>
+    <h1 class="header text-center p-1">Trivia</h1>
 
     <div class="container">
+
+        <!-- <h2>Host Start Modal</h2> -->
+        <!-- Button to Open the Modal -->
+        <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+            Open modal
+        </button> -->
 
         <!-- The Modal -->
         <div class="modal" id="myModal">
@@ -49,7 +56,7 @@
                         <h4 class="modal-title">New Game</h4>
                     </div>
 
-                    <!-- Modal body -->
+                    <!-- Modal Questions-->
                     <div class="modal-inner">
                     <div class="form-group text-center" id="popUp1">
                         <label for="hostName">Host Name</label>
@@ -59,8 +66,6 @@
                     <div class="modal-body text-center">
                         
                     </div>
-                </div>
-            </div>
                     <!-- Modal footer -->
                     <div class="modal-footer">
                         <button type="button" class="btn btn-danger" id="create">Create Game</button>
@@ -70,36 +75,45 @@
             </div>
         </div>
 
-<!-- The Modal -->
-<div class="modal" id="playerModal">
-    <div class="modal-dialog">
-        <div class="modal-content">
+        <!-- Players other than host modal to join game -->
+        <!-- <h2>Player Start Modal</h2> -->
+        <!-- Button to Open the Modal -->
+        <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#playerModal">
+            Open modal
+        </button> -->
 
-            <!-- Modal Header -->
-            <div class="modal-header">
-                <h4 class="modal-title">Enter Your Name to Play</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <!-- The Modal -->
+        <div class="modal" id="playerModal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- Modal Questions -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Enter Your Name to Play</h4>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <div class="form-group" id="popUp1">
+                        <label for="playerName">Player Name</label>
+                        <input type="name" class="form-control" id="player-name" aria-describedby="playerName"
+                            placeholder="Enter name">
+                    </div>
+
+
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-warning text-dark" data-dismiss="modal" id="join>Join Game</button>
+                    </div>
+
+                </div>
             </div>
-
-            <!-- Modal body -->
-            <div class="form-group" id="popUp1">
-                <label for="playerName">Player Name</label>
-                <input type="name" class="form-control" id="player-name" aria-describedby="playerName" placeholder="Enter name">
-              </div>
-
-       
-            <!-- Modal footer -->
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger" id="join">Join Game</button>
-            </div>
-
         </div>
-    </div>
-</div>
 
+        <!-- Holds all of the Question box info including timer -->
         <div class="row">
-            <div class="col-12 mb-3">
-                <div class="border rounded-top p-4 quest-box shadow">
+            <div class="col-12 mb-3" id="quest-box">
+                <div class="border-0 rounded-top p-4 quest-box shadow">
                     <h3 class="text-center quest-head">Question</h3>
                     <h3 class="text-center quest-head">Time Remaining: <span id="timer">0</span></h3>
                     <h4 class="text-center p-3" id="question">Waiting to start game...</h4>
@@ -114,9 +128,16 @@
 </div>
 </div>
 
-        <div class="row"> 
+                    <!-- Designated spot for answers -->
+                    <div class="text-center" id="answers" style="display: none"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player 1 card -->
+        <div class="row justify-content-center mb-4">
             <div class="col-3" id="card1">
-                <div class="card border rounded-bottom shadow">
+                <div class="card border-0 rounded-bottom shadow">
                     <div class="text-center card1">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar1" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player1">Player 1</h5>
@@ -125,8 +146,9 @@
                 </div>
             </div>
 
+            <!-- Player 2 card -->
             <div class="col-3" id="card2">
-                <div class="card border rounded-bottom shadow">
+                <div class="card border-0 rounded-bottom shadow">
                     <div class="text-center card2">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar2" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player2">Player 2</h5>
@@ -136,8 +158,9 @@
                 </div>
             </div>
 
+            <!-- Player 3 card -->
             <div class="col-3" id="card3">
-                <div class="card border rounded-bottom shadow card3">
+                <div class="card border-0 rounded-bottom shadow card3">
                     <div class="text-center card3">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar3" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player3">Player 3</h5>
@@ -146,8 +169,9 @@
                 </div>
             </div>
 
+            <!-- Player 4 card -->
             <div class="col-3" id="card4">
-                <div class="card border rounded-bottom shadow">
+                <div class="card border-0 rounded-bottom shadow">
                     <div class="text-center card4">
                             <img class="text-center card-img-top mb-2 p-2" id="avatar4" src="https://via.placeholder.com/150/150" alt="Image 1">
                         <h5 class="text-center player-font" id="player4">Player 4</h5>
@@ -157,14 +181,14 @@
                 </div>
             </div>
         </div>
-  
 
 
-        <h2>Player Win Modal</h2>
+
+        <!-- <h2>Player Win Modal</h2> -->
         <!-- Button to Open the Modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal2">
+        <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modal2">
             Open modal
-        </button>
+        </button> -->
 
         <!-- The Modal -->
         <div class="modal" id="modal2">
@@ -192,25 +216,7 @@
         </div>
 
 
-
-
-
-
-
-
-
-
-
-
     </div>
-
-
-
-
-
-
-
-
 
 
     <!-- Script -->
