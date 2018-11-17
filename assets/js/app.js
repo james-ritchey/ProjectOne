@@ -457,7 +457,7 @@ $(document).ready(function(){
                 }
         });
         game.questionData.questionNum++;
-        if(game.questionData.questionNum > 2) {
+        if(game.questionData.questionNum > 10) {
             setTimeout(endGame, 2000);
         }
         else {
