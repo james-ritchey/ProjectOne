@@ -19,11 +19,11 @@ $(document).ready(function(){
         playerNum: 0,
         allAnswered: false,
         questionMax: 10,
+        questionNum: 1,
         questionData: {
             correctAnswer: "",
             answerList: {A: "", B: "", C: "", D: ""},
             question: "",
-            questionNum: 1,
             timerValue: 0
         },
         reset: function() {
@@ -67,11 +67,11 @@ $(document).ready(function(){
         gameFull: false,
         allAnswered: false,
         questionMax: 10,
+        questionNum: 1,
         questionData: {
             correctAnswer: "",
             answerList: {A: "", B: "", C: "", D: ""},
             question: "",
-            questionNum: 1,
             timerValue: 15
         }
     }
@@ -125,7 +125,6 @@ $(document).ready(function(){
             if(game.gameCreated && !game.gameFull){
                 $("#playerModal").modal("show");
                 $("#myModal").modal("hide");
-                console.log("were trying i swear");
             }
             else if(game.gameCreated && game.gameFull) {
                 $("#playerModal").modal("hide");
@@ -215,7 +214,6 @@ $(document).ready(function(){
             game.playerNum = newPlayerNum;
         }
         database.ref("game/playerNum").set(game.playerNum);
-        console.log("We know the players changed to " + JSON.stringify(game.players));
     });
 
     database.ref("game/playerNum").on("value", function(snapshot){
@@ -271,13 +269,15 @@ $(document).ready(function(){
             $(newAnswerDiv).html(answerPick);
             $(newAnswerDiv).addClass("answer-choice");
             $("#answers").append(newAnswerDiv);
-            console.log("Answer: " + answerPick);
         }
         if(game.gameStarted) {
             intervalID = setInterval(decrement, 1000);
         }
     });
 
+    database.ref("game/questionNum").on("value", function(snapshot){
+        game.questionNum = snapshot.val();
+    });
     //============================== End Firebase Logic ==================================================>>
 
 //============================== Start Game Logic ====================================================>>
@@ -389,7 +389,6 @@ $(document).ready(function(){
     $(document).on("click", ".answer-choice", function(){
         if(game.localPlayer !== ""){
             var answer = $(this).html();
-            console.log(answer);
             database.ref("game/players/" + game.localPlayer + "/answer").set(answer);
             var numAnswered = 0;
             for(var i = 1; i <= game.playerNum; i++) {
@@ -399,7 +398,6 @@ $(document).ready(function(){
                     }
                     if(numAnswered === game.playerNum) {
                         database.ref("game/allAnswered").set(true);
-                        console.log("Tried to set allAnswered");
                     }
                 });
             }    
@@ -444,7 +442,6 @@ $(document).ready(function(){
     }
 
     timeUp = function() {
-        console.log("Times up");
         var answer = "";
         var score = 0;
         database.ref("game/players/" + game.localPlayer).once("value").then(function(snapshot){
@@ -456,8 +453,11 @@ $(document).ready(function(){
                     database.ref("game/players/" + game.localPlayer + "/score").set(score);
                 }
         });
-        game.questionData.questionNum++;
-        if(game.questionData.questionNum > 10) {
+        if(game.isHost) {
+            game.questionNum++;
+            database.ref("game/questionNum").set(game.questionNum);
+        }
+        if(game.questionNum > game.questionMax) {
             setTimeout(endGame, 2000);
         }
         else {
